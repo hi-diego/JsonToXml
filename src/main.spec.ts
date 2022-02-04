@@ -8,7 +8,7 @@ import test from './test.json';
  *
  * @const
  */
-const expectedResult: string = `<root><name>Test</name><facts><facts.0>it something</facts.0><facts.1>it some other thing</facts.1></facts><details><details.preformance>true</details.preformance><details.benchmark><details.benchmark.0>1</details.benchmark.0><details.benchmark.1>2</details.benchmark.1><details.benchmark.2>3</details.benchmark.2></details.benchmark></details></root>`;
+const expectedResult: string = `<test><name>Test</name><facts><facts.0>it something</facts.0><facts.1>it some other thing</facts.1></facts><details><details.preformance>true</details.preformance><details.benchmark><details.benchmark.0>1</details.benchmark.0><details.benchmark.1>2</details.benchmark.1><details.benchmark.2>3</details.benchmark.2></details.benchmark></details></test>`;
 /** Summary.
  *
  * Description.
@@ -26,7 +26,7 @@ const testString: string = JSON.stringify(test);
  */
 describe('ObjectToXmlDocument', () => {
   it('should convert a JsonObject to a XMLDocument.', () => {
-    var xmlString = JsonToXml(testString);
+    var xmlString = JsonToXml(testString, 'test');
     expect(xmlString).toEqual(expectedResult);
   })
 })
@@ -39,9 +39,8 @@ describe('ObjectToXmlDocument', () => {
  * @returns {Object} The return description.
  */
 describe('Transform', () => {
-  it('should read transform and write a a XML file from a Json file.', () => {
+  it('should not fail trying to read transform and write a a XML file from a Json file.', () => {
     var testPath: string = path.join(__dirname, 'test.json');
     Transform(testPath);
-    // expect(xmlString).toEqual(expectedResult);
   })
 })
