@@ -1,5 +1,6 @@
 import path from 'path';
-import { JsonToXml, Transform } from './main';
+import { JsonToXml } from './main';
+import { Transform } from './server';
 import test from './test.json';
 /** Summary.
  *
