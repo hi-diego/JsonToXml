@@ -105,16 +105,17 @@ export function ValueToXmlString(i: any, xml: string): string {
 export function WalkObject(obj: any, callback: (r: any) => void, key: string|null = null, path: string = '', parent: any = null, result: any = null): void {
     const value = (key === null) ? obj : (parent[key] || obj);
     result = callback({ value, path, key, parent, result, obj });
-    if (typeof(value) === 'object') {
-        // for (const k of Object.keys(obj)) WalkObject(obj[k], callback, k, `${path}${ path ? '.' : '' }${k}`, obj, result);
-        Object.keys(obj).forEach(k => WalkObject(obj[k], callback, k, `${path}${ path ? '.' : '' }${k}`, obj, result));
-    }
+    if (typeof(value) !== 'object') return;
+    Object.keys(obj).forEach(k => WalkObject(obj[k], callback, k, `${path}${ path ? '.' : '' }${k}`, obj, result));
 }
-const test = { name: 'Test', facts: ['it something', 'it some other thing'], details: { preformance: true, benchmark: [ 1, 2, 3] } };
-// WalkObject(test, (i: any) => console.log(i));
-// console.log(JSON.stringify(test));
-// console.log(ObjectToXmlString(test));
-var serializer: XMLSerializer = new XMLSerializer();
-var xml = ObjectToXmlDocument(test);
-var xmlString = serializer.serializeToString(xml);
-console.log(xml, xmlString);
+/** Summary.
+ *
+ * Description.
+ *
+ * @throws {Exception}
+ * @param {object} o - Param description (e.g. "add", "edit").
+ * @returns {string} The correspondent XML string of the given object.
+ */
+export function ObjectIteratorPath(path: string, key: string): string {
+    return path === null ? key : `${path}.${key}`;
+}
