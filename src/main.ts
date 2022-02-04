@@ -14,22 +14,53 @@
 //         throw new Error('InvalidArgumentException');
 //     }
 // }
-// /** Summary.
-//  *
-//  * Description.
-//  *
-//  * @throws {Exception}
-//  * @param {object} obj - Param description (e.g. "add", "edit").
-//  * @returns {string} The correspondent XML string of the given object.
-//  */
-// export function ObjectToXmlString(obj: {}): string {
-//     var xml: string = '';
-//     for (const key in Object.keys(obj)) {
-//         xml += `<${key}>${xml}<${key}>`;
-//         xml += `<${key}>${obj[key]}<${key}>`;
-//     }
-//     return xml;
-// }
+/** Summary.
+ *
+ * Description.
+ *
+ * @throws {Exception}
+ * @param {object} obj - Param description (e.g. "add", "edit").
+ * @returns {string} The correspondent XML string of the given object.
+ */
+export function ObjectToXmlDocument(obj: {}): string {
+    var xml: XMLDocument = (new DOMParser()).parseFromString('<root></root>', "application/xml");
+    WalkObject(obj, (i: any) => {
+        if (!i.result) return xml.documentElement;
+        console.log(i);
+        var child: Element = xml.createElement(i.path);
+        child.innerHTML = i.value;
+        i.result.appendChild(child);
+        return child;
+    });
+    var serializer: XMLSerializer = new XMLSerializer();
+    // console.log(xml);
+    return serializer.serializeToString(xml);
+}
+/** Summary.
+ *
+ * Description.
+ *
+ * @throws {Exception}
+ * @param {object} obj - Param description (e.g. "add", "edit").
+ * @returns {string} The correspondent XML string of the given object.
+ */
+export function ObjectToXmlString(obj: {}): string {
+    var xml: string = '';
+    WalkObject(obj, (i: any) => (xml = ValueToXmlString(i, xml)));
+    return xml.replace('~', '');
+}
+/** Summary.
+ *
+ * Description.
+ *
+ * @throws {Exception}
+ * @param {object} obj - Param description (e.g. "add", "edit").
+ * @returns {string} The correspondent XML string of the given object.
+ */
+export function ValueToXmlString(i: any, xml: string): string {
+    if (!i.key) return `<root>~</root>`;
+    return xml.replace('~', Array.isArray(i.value) ? `<${i.key}>~</${i.key}>` : `<${i.path}>${i.value}</${i.path}>~`);
+}
 // /** Summary.
 //  *
 //  * Description.
@@ -61,21 +92,18 @@
  * Description.
  *
  * @throws {Exception}
- * @param {object} obj - Param description (e.g. "add", "edit").
+ * @param {object} o - Param description (e.g. "add", "edit").
  * @returns {string} The correspondent XML string of the given object.
  */
-export function WalkObject(obj: any, callback: (r: any) => void, key: string|null = null, path: string = ''): void {
-    // for (const key in Object.keys(obj)) {
-    callback({value: obj, path});
-    const value = (key === null) ? obj : (obj[key] || obj);
-    // console.log(obj, typeof(obj), key)
+export function WalkObject(o: any, callback: (r: any) => void, key: string|null = null, path: string = '', parent: any = null, result: any = null): void {
+    const value = (key === null) ? o : (o[key] || o);
+    result = callback({ value, path, key, parent, result });
     if (typeof(value) === 'object') {
-        // const iterations = [...(obj)];
-        for (const k of Object.keys(obj)) WalkObject(obj[k], callback, k, `${path}.${k}`);
-        // console.log(obj, typeof(obj), Object.keys(obj))
-        // iterations.forEach(i => WalkObject(o, callback));
-        // callback();
+        for (const k of Object.keys(o)) WalkObject(o[k], callback, k, `${path}${ path ? '.' : '' }${k}`, o, result);
     }
 }
-const test = { name: 'Test', facts: ['it something', 'it some other thing'] };
-WalkObject(test, (r: any) => console.log(r));
+const test = { name: 'Test', facts: ['it something', 'it some other thing'], details: { preformance: true } };
+// WalkObject(test, (i: any) => console.log(i));
+// console.log(JSON.stringify(test));
+// console.log(ObjectToXmlString(test));
+console.log(ObjectToXmlDocument(test));
