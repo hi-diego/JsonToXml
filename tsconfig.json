@@ -13,7 +13,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
-    "types": ["vite/client", "@types/jest"]
+    "types": ["vite/client", "@types/jest", "@types/node"]
   },
   "include": ["./src"]
 }

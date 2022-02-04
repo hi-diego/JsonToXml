@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 /**
  * Parse the given Json string.
  *
@@ -7,12 +9,63 @@
  * @param {string} jsonString - The mode being performed (e.g. "add", "edit").
  * @returns {Object} The Object correspondent to the given JsonString.
  */
-export function ParseJsonOrFail(jsonString: string) : {} {
-    try {
-        return JSON.parse(jsonString);
-    } catch (e) {
-        throw new Error('InvalidArgumentException');
-    }
+export function Transform(inPath: string, outPath: string|null = null): void {
+    var xmlString = FromJsonToXml(inPath, path.basename(inPath).replace('.json', ''));
+    fs.writeFileSync(outPath || inPath.replace('.json', '.xml'), xmlString, { encoding:'utf8' });
+}
+/**
+ * Parse the given Json string.
+ *
+ * Description.
+ *
+ * @throws {InvalidArgumentException}
+ * @param {string} jsonString - The mode being performed (e.g. "add", "edit").
+ * @returns {Object} The Object correspondent to the given JsonString.
+ */
+export function FromJsonToXml(path: string, root: string = 'root'): string {
+    var json = ReadJsonFile(path);
+    var xmlString = JsonToXml(json, root);
+    return xmlString;
+}
+/**
+ * Parse the given Json string.
+ *
+ * Description.
+ *
+ * @throws {InvalidArgumentException}
+ * @param {string} jsonString - The mode being performed (e.g. "add", "edit").
+ * @returns {Object} The Object correspondent to the given JsonString.
+ */
+export function ObjectToXml(obj: {}, root: string = 'root'): string {
+    var serializer: XMLSerializer = new XMLSerializer();
+    var xml = ObjectToXmlDocument(obj, root);
+    var xmlString = serializer.serializeToString(xml);
+    return xmlString;
+}
+/**
+ * Parse the given Json string.
+ *
+ * Description.
+ *
+ * @throws {InvalidArgumentException}
+ * @param {string} jsonString - The mode being performed (e.g. "add", "edit").
+ * @returns {Object} The Object correspondent to the given JsonString.
+ */
+export function JsonToXml(json: string, root: string = 'root'): string {
+    var jsonObject = JSON.parse(json);
+    return ObjectToXml(jsonObject, root);
+}
+/**
+ * Parse the given Json string.
+ *
+ * Description.
+ *
+ * @throws {InvalidArgumentException}
+ * @param {string} jsonString - The mode being performed (e.g. "add", "edit").
+ * @returns {Object} The Object correspondent to the given JsonString.
+ */
+export function ReadJsonFile(path: string): string {
+    return fs.readFileSync(path, { encoding:'utf8', flag:'r' });
 }
 /** Summary.
  *
@@ -22,9 +75,9 @@ export function ParseJsonOrFail(jsonString: string) : {} {
  * @param {object} obj - Param description (e.g. "add", "edit").
  * @returns {string} The correspondent XML string of the given object.
  */
-export function ObjectToXmlDocument(obj: {}): XMLDocument {
+export function ObjectToXmlDocument(obj: {}, root: string = 'root'): XMLDocument {
     var parser: DOMParser = new DOMParser();
-    var xml: XMLDocument = parser.parseFromString('<root></root>', "application/xml");
+    var xml: XMLDocument = parser.parseFromString(`<${root}></${root}>`, "application/xml");
     WalkObject(obj, (i: any) => ObjectIterationToXmlElement(i, xml));
     return xml; 
 }
@@ -48,57 +101,6 @@ export function ObjectIterationToXmlElement(i: any, rootXml: XMLDocument): any {
  * Description.
  *
  * @throws {Exception}
- * @param {object} obj - Param description (e.g. "add", "edit").
- * @returns {string} The correspondent XML string of the given object.
- */
-export function ObjectToXmlString(obj: {}): string {
-    var xml: string = '';
-    WalkObject(obj, (i: any) => (xml = ValueToXmlString(i, xml)));
-    return xml.replace('~', '');
-}
-/** Summary.
- *
- * Description.
- *
- * @throws {Exception}
- * @param {object} obj - Param description (e.g. "add", "edit").
- * @returns {string} The correspondent XML string of the given object.
- */
-export function ValueToXmlString(i: any, xml: string): string {
-    if (!i.key) return `<root>~</root>`;
-    return xml.replace('~', Array.isArray(i.value) ? `<${i.key}>~</${i.key}>` : `<${i.path}>${i.value}</${i.path}>~`);
-}
-// /** Summary.
-//  *
-//  * Description.
-//  *
-//  * @throws {Exception}
-//  * @param {object} obj - Param description (e.g. "add", "edit").
-//  * @returns {string} The correspondent XML string of the given object.
-//  */
-// export function ObjectToXmlString_(obj: any): string {
-//     var xml: string = '';
-//     Object.keys(obj).map((key: string) => `<${key}>${obj[key]}<${key}>`);
-//         // xml += `<${key}>${xml}<${key}>`;
-//     return xml;
-// }
-// /** Summary.
-//  *
-//  * Description.
-//  *
-//  * @throws {Exception}
-//  * @param {object} obj - Param description (e.g. "add", "edit").
-//  * @returns {string} The correspondent XML string of the given object.
-//  */
-// export function XmlStringValueFromObjectKey(obj: any, key: string): string {
-//     const value = obj[key];
-//     return value + `<${key}>${value}<${key}>`;
-// }
-/** Summary.
- *
- * Description.
- *
- * @throws {Exception}
  * @param {object} o - Param description (e.g. "add", "edit").
  * @returns {string} The correspondent XML string of the given object.
  */
@@ -107,15 +109,4 @@ export function WalkObject(obj: any, callback: (r: any) => void, key: string|nul
     result = callback({ value, path, key, parent, result, obj });
     if (typeof(value) !== 'object') return;
     Object.keys(obj).forEach(k => WalkObject(obj[k], callback, k, `${path}${ path ? '.' : '' }${k}`, obj, result));
-}
-/** Summary.
- *
- * Description.
- *
- * @throws {Exception}
- * @param {object} o - Param description (e.g. "add", "edit").
- * @returns {string} The correspondent XML string of the given object.
- */
-export function ObjectIteratorPath(path: string, key: string): string {
-    return path === null ? key : `${path}.${key}`;
 }

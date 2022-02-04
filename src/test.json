@@ -1,0 +1,15 @@
+{
+  "name": "Test",
+  "facts": [
+    "it something",
+    "it some other thing"
+  ],
+  "details": {
+    "preformance": true,
+    "benchmark": [
+      1,
+      2,
+      3
+    ]
+  }
+}

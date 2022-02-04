@@ -1,4 +1,6 @@
-import { ObjectToXmlDocument } from './main';
+import path from 'path';
+import { JsonToXml, Transform } from './main';
+import test from './test.json';
 /** Summary.
  *
  * Description.
@@ -12,7 +14,7 @@ const expectedResult: string = `<root><name>Test</name><facts><facts.0>it someth
  *
  * @const
  */
-const test: {} = { name: 'Test', facts: ['it something', 'it some other thing'], details: { preformance: true, benchmark: [ 1, 2, 3] } };
+const testString: string = JSON.stringify(test);
 /** Summary.
  *
  * Description.
@@ -22,10 +24,23 @@ const test: {} = { name: 'Test', facts: ['it something', 'it some other thing'],
  * @returns {Object} The return description.
  */
 describe('ObjectToXmlDocument', () => {
-  it('should transform a JsonObject to a XMLDocument', () => {
-    var serializer: XMLSerializer = new XMLSerializer();
-    var xml = ObjectToXmlDocument(test);
-    var xmlString = serializer.serializeToString(xml);
+  it('should convert a JsonObject to a XMLDocument.', () => {
+    var xmlString = JsonToXml(testString);
     expect(xmlString).toEqual(expectedResult);
+  })
+})
+/** Summary.
+ *
+ * Description.
+ *
+ * @throws {Exception}
+ * @param {string} paramName - Param description (e.g. "add", "edit").
+ * @returns {Object} The return description.
+ */
+describe('Transform', () => {
+  it('should read transform and write a a XML file from a Json file.', () => {
+    var testPath: string = path.join(__dirname, 'test.json');
+    Transform(testPath);
+    // expect(xmlString).toEqual(expectedResult);
   })
 })
