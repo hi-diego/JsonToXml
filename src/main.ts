@@ -1,4 +1,15 @@
-
+/**
+ * Summary.
+ *
+ * Description.
+ */
+export interface ObjectIteration {
+    value: string,
+    path: string|null,
+    key: string|null,
+    parent: any,
+    lastResult: any
+}
 /**
  * Parse the given Json string.
  *
@@ -89,13 +100,13 @@ export function IteratorPath(path: string|null, key: string): string {
  * @param   {any}               lastResult - Hold the result of the last execution of the given callback and provides it for each call on the graph traversal.
  * @returns {void}                         - The correspondent XML string of the given object.
  */
-export function WalkObject(
+export function WalkObject<ReturnType>(
     obj: any,
-    callback: (r: any) => void,
+    callback: (i: ObjectIteration) => ReturnType,
     key: string|null = null,
     path: string|null = null,
     parent: any = null,
-    lastResult: any = null
+    lastResult: ReturnType|null = null
 ): void {
     // value variable will hold the value of the current property being explored.
     // So if this is the first run it will hold the root object
