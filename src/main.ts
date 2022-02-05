@@ -41,9 +41,10 @@ export function ObjectToXmlDocument(obj: {}, root: string = 'root'): XMLDocument
     WalkObject(obj, (i: any) => ObjectIterationToXmlElement(i, xml));
     return xml; 
 }
-/** Summary.
+/**
+ * Transform an ObjectIteration to its corresponednt XmlElement and appends it to its father for each graph traversal operation.
  *
- * Description.
+ *
  *
  * @throws {Exception}
  * @param {object} obj - Param description (e.g. "add", "edit").
@@ -64,8 +65,8 @@ export function ObjectIterationToXmlElement(i: any, rootXml: XMLDocument): any {
  * Example: for the property bar in { foo: { bar: 'baz' } } we need to return the last path + . + key.
  * If path is null: (ex: for the root object) it will return the current key being explored.
  *
- * @param {string|null}   path - Full path of the current property being explored recursivly.
- * @param {string}         key - Name of the current property being explored recursivly.
+ * @param   {string|null}   path - Full path of the current property being explored recursivly.
+ * @param   {string}         key - Name of the current property being explored recursivly.
  * @returns {string}           - The correspondent path of the current iteration.
  */
 export function IteratorPath(path: string|null, key: string): string {
