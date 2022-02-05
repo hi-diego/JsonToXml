@@ -95,20 +95,7 @@ export function IterationPath(path: string|null, key: string|null): string|null 
  * @param   {string}         key - Name of the current property being explored recursivly.
  * @returns {string}           - The correspondent path of the current iteration.
  */
-export function NextIteration(value: any, key: string|null, path: string|null, parent: any): ObjectIteration {
-    return { value: value, key, parent, path: IterationPath(path, key) };
-}
-/**
- * Returns the correspondent js dot separated path of the current graph traversal iteration.
- *
- * Example: for the property bar in { foo: { bar: 'baz' } } we need to return the last path + . + key.
- * If path is null: (ex: for the root object) it will return the current key being explored.
- *
- * @param   {string|null}   path - Full path of the current property being explored recursivly.
- * @param   {string}         key - Name of the current property being explored recursivly.
- * @returns {string}           - The correspondent path of the current iteration.
- */
-export function NextIteration_(it: ObjectIteration, key: string): ObjectIteration {
+export function NextIteration(it: ObjectIteration, key: string): ObjectIteration {
     return { value: it.value[key], key, parent: it.value, path: IterationPath(it.path, key) };
 }
 /** 
@@ -123,7 +110,7 @@ export function NextIteration_(it: ObjectIteration, key: string): ObjectIteratio
  *                                                        [obj] variable will hold the whole given object,
  *                                                        the second recursion will explore the property 'foo' and [obj] variable will hold the value 'bar'.
  * @param   {<T>(r: ObjectIteration) => T}  callback   -  The function to call on each value of the given object. NOTE: is also called on the root object.
- * @param   {ObjectIteration}               it         -  The current Object property data to be itreater recursivly.
+ * @param   {ObjectIteration}               it         -  The current Object property iteration data.
  * @param   {T|null}                        lastResult -  Hold the result of the last execution of the given callback and provides it for each call on the graph traversal.
  * @returns {void}                                     -  The correspondent XML string of the given object.
  */
@@ -138,5 +125,5 @@ export function WalkObject<T>(object_: any, callback: (i: ObjectIteration, lastR
     if (typeof(it.value) !== 'object' && it.value !== null) return;
     // Array and Objects can be iterable through Object.keys(value) so: for each key of the value we walk recursivly.
     // NOTE: Object.keys(['a', 'b', 'c']) === [0, 1, 2], and for common objects: Object.keys({a: 0, b: 1, c: 2}) is ['a', 'b': 'c'].
-    Object.keys(object_).forEach(key => WalkObject(object_[key], callback, NextIteration_(it, key), lastResult));
+    Object.keys(object_).forEach(key => WalkObject(object_[key], callback, NextIteration(it, key), lastResult));
 }
