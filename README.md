@@ -1,4 +1,4 @@
-# JsonToXml
+# json-to-xml
 Simple way to convert JSON to XML
 ```js
 import { ObjectToXml } from 'json-to-xml';
