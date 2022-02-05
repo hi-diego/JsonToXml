@@ -58,21 +58,24 @@ export function ObjectIterationToXmlElement(i: any, rootXml: XMLDocument): any {
     i.lastResult.appendChild(child);
     return child;
 }
-/** Summary.
+/**
+ * Returns the correspondent js dot separated path of the current graph traversal iteration.
  *
- * Description.
+ * Example: for the property bar in { foo: { bar: 'baz' } } we need to return the last path + . + key.
+ * If path is null: (ex: for the root object) it will return the current key being explored.
  *
- * @throws {Exception}
- * @param {object} o - Param description (e.g. "add", "edit").
- * @returns {string} The correspondent XML string of the given object.
+ * @param {string|null}   path - Full path of the current property being explored recursivly.
+ * @param {string}         key - Name of the current property being explored recursivly.
+ * @returns {string}           - The correspondent path of the current iteration.
  */
-export function IteratorPath(path: string, key: string): string {
+export function IteratorPath(path: string|null, key: string): string {
     return !path ? key : `${path}.${key}`;
 }
 /** 
  * Recursive walk of the properties of the given object and exec the given callback.
  *
- * Graph traversal for js arrays and objects.
+ * Graph traversal for classic js arrays and js objects.
+ * NOTE: it will not work for Maps and sets you will to transform first your map/set to an object or an array.
  *
  * @param {object}              obj        - The object to traverse recursively.
  *                                           NOTE: this changes on every recursion level,
@@ -89,13 +92,13 @@ export function WalkObject(
     obj: any,
     callback: (r: any) => void,
     key: string|null = null,
-    path: string = '',
+    path: string|null = null,
     parent: any = null,
     lastResult: any = null
 ): void {
     // value variable will hold the value of the current property being explored.
-    // So if this is the first run it will be the given object
-    // but for the next recurtions it will be the the value that holds the parent in the current key baing explored: parent[key].
+    // So if this is the first run it will hold the root object
+    // but for the next recurtions it will hold the value of the parent in the current key being explored: parent[key].
     const value = (key === null) ? obj : (parent[key] || obj);
     // lastResult will hold the return value of the callback in each recursion. NOTE: on the first recurtion lastResult is null;
     lastResult = callback({ value, path, key, parent, lastResult });
