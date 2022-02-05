@@ -22,17 +22,13 @@ var xmlString = ObjectToXml(object, 'test');
 console.log(xmlString);
 // <test>
 //   <name>Test</name>
-//   <facts>
-//     <facts.0>it something</facts.0>
-//     <facts.1>it some other thing</facts.1>
-//   </facts>
+//   <test>it something</test>
+//   <test>it some other thing</test>
 //   <details>
 //     <preformance>true</preformance>
-//     <benchmark>
-//       <benchmark.0>1</benchmark.0>
-//       <benchmark.1>2</benchmark.1>
-//       <benchmark.2>3</benchmark.2>
-//     </benchmark>
+//     <details>1</details>
+//     <details>2</details>
+//     <details>3</details>
 //   </details>
 // </test>
 ```

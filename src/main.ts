@@ -50,10 +50,12 @@ export function ObjectToXmlDocument(obj: {}, root: string = 'root'): XMLDocument
  * @returns {string} The correspondent XML string of the given object.
  */
 export function ObjectIterationToXmlElement(i: any, rootXml: XMLDocument): any {
-    if (!i.result) return rootXml.documentElement;
-    var child: Element = rootXml.createElement(Array.isArray(i.parent) ? i.path.split('.').slice(-2).join('.') : i.key);
+    if (!i.lastResult) return rootXml.documentElement;
+    if (Array.isArray(i.value)) return i.lastResult;
+    var childElementName: string = Array.isArray(i.parent) ? i.lastResult.tagName : i.key;
+    var child: Element = rootXml.createElement(childElementName);
     if (typeof(i.value) !== 'object') child.innerHTML = i.value;
-    i.result.appendChild(child);
+    i.lastResult.appendChild(child);
     return child;
 }
 /** Summary.
@@ -81,14 +83,20 @@ export function IteratorPath(path: string, key: string): string {
  * @param   {string}            key       - Hold the key of the current property being explored on the graph traversal operation. NOTE: is null on the first recursion.
  * @param   {object}            parent    - Hold the current parent node of the current property being explored on the graph traversal operation.
  * @param   {any}               result    - Hold the result of the last execution of the given callback and provides it for each call on the graph traversal.
- * @returns {void}                      - The correspondent XML string of the given object.
+ * @returns {void}                        - The correspondent XML string of the given object.
  */
-export function WalkObject(obj: any, callback: (r: any) => void, key: string|null = null, path: string = '', parent: any = null, result: any = null): void {
+export function WalkObject(
+    obj: any, callback: (r: any) => void,
+    key: string|null = null,
+    path: string = '',
+    parent: any = null,
+    lastResult: any = null
+): void {
     // value variable will hold the value of the current property being explored.
     // So if this is the first run it will be the given object
     // but for the next recurtions it will be the the value that holds the parent in the current key baing explored: parent[key].
     const value = (key === null) ? obj : (parent[key] || obj);
-    result = callback({ value, path, key, parent, result, obj });
+    lastResult = callback({ value, path, key, parent, lastResult });
     if (typeof(value) !== 'object') return;
-    Object.keys(obj).forEach(k => WalkObject(obj[k], callback, k, IteratorPath(path, k), obj, result));
+    Object.keys(obj).forEach(k => WalkObject(obj[k], callback, k, IteratorPath(path, k), obj, lastResult));
 }
