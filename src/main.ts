@@ -2,13 +2,15 @@
  * Summary.
  *
  * Description.
+ *
+ * @member {string}   key        -  Hold the key of the current property being explored on the graph traversal operation. NOTE: is null on the first recursion.
+ * @member {object}   parent     -  Hold the current parent node of the current property being explored on the graph traversal operation.
  */
 export interface ObjectIteration {
-    value: string,
+    value: any,
     path: string|null,
     key: string|null,
-    parent: any,
-    lastResult: any
+    parent: any
 }
 /**
  * Parse the given Json string.
@@ -49,7 +51,7 @@ export function ObjectToXml(obj: {}, root: string = 'root'): string {
 export function ObjectToXmlDocument(obj: {}, root: string = 'root'): XMLDocument {
     var parser: DOMParser = new DOMParser();
     var xml: XMLDocument = parser.parseFromString(`<${root}></${root}>`, "application/xml");
-    WalkObject(obj, (i: any) => ObjectIterationToXmlElement(i, xml));
+    WalkObject<Element|null>(obj, (i: ObjectIteration, lastResult: Element|null) => ObjectIterationToXmlElement(i, lastResult, xml));
     return xml; 
 }
 /**
@@ -61,13 +63,13 @@ export function ObjectToXmlDocument(obj: {}, root: string = 'root'): XMLDocument
  * @param {object} obj - Param description (e.g. "add", "edit").
  * @returns {string} The correspondent XML string of the given object.
  */
-export function ObjectIterationToXmlElement(i: any, rootXml: XMLDocument): any {
-    if (!i.lastResult) return rootXml.documentElement;
-    if (Array.isArray(i.value)) return i.lastResult;
-    var childElementName: string = Array.isArray(i.parent) ? i.lastResult.tagName : i.key;
-    var child: Element = rootXml.createElement(childElementName);
+export function ObjectIterationToXmlElement(i: ObjectIteration, lastResult: Element|null, rootXml: XMLDocument): Element|null {
+    if (!lastResult) return rootXml.documentElement;
+    if (Array.isArray(i.value)) return lastResult;
+    var childName: string|null = Array.isArray(i.parent) ? lastResult.tagName : i.key;
+    var child: Element = rootXml.createElement(childName||'');
     if (typeof(i.value) !== 'object') child.innerHTML = i.value;
-    i.lastResult.appendChild(child);
+    lastResult.appendChild(child);
     return child;
 }
 /**
@@ -80,8 +82,21 @@ export function ObjectIterationToXmlElement(i: any, rootXml: XMLDocument): any {
  * @param   {string}         key - Name of the current property being explored recursivly.
  * @returns {string}           - The correspondent path of the current iteration.
  */
-export function IteratorPath(path: string|null, key: string): string {
+export function IterationPath(path: string|null, key: string): string {
     return !path ? key : `${path}.${key}`;
+}
+/**
+ * Returns the correspondent js dot separated path of the current graph traversal iteration.
+ *
+ * Example: for the property bar in { foo: { bar: 'baz' } } we need to return the last path + . + key.
+ * If path is null: (ex: for the root object) it will return the current key being explored.
+ *
+ * @param   {string|null}   path - Full path of the current property being explored recursivly.
+ * @param   {string}         key - Name of the current property being explored recursivly.
+ * @returns {string}           - The correspondent path of the current iteration.
+ */
+export function NextIteration(it: ObjectIteration, key: string, parent: any): ObjectIteration {
+    return { value: it.value, key, parent, path: IterationPath(it.path, key) };
 }
 /** 
  * Recursive walk of the properties of the given object and exec the given callback.
@@ -89,34 +104,26 @@ export function IteratorPath(path: string|null, key: string): string {
  * Graph traversal for classic js arrays and js objects.
  * NOTE: it will not work for Maps and sets you will to transform first your map/set to an object or an array.
  *
- * @param {object}              obj        - The object to traverse recursively.
- *                                           NOTE: this changes on every recursion level,
- *                                           so for an object { foo: 'bar' } -> the first recursion
- *                                           [obj] variable will hold the whole given object,
- *                                           the second recursion will explore the property 'foo' and [obj] variable will hold the value 'bar'.
- * @param   {(r: any) => void}  callback   - The function to call on each value of the given object. NOTE: is also called on the root object.
- * @param   {string}            key        - Hold the key of the current property being explored on the graph traversal operation. NOTE: is null on the first recursion.
- * @param   {object}            parent     - Hold the current parent node of the current property being explored on the graph traversal operation.
- * @param   {any}               lastResult - Hold the result of the last execution of the given callback and provides it for each call on the graph traversal.
- * @returns {void}                         - The correspondent XML string of the given object.
+ * @param {object}                          object_    -  The object to traverse recursively.
+ *                                                        NOTE: this changes on every recursion level,
+ *                                                        so for an object { foo: 'bar' } -> the first recursion
+ *                                                        [obj] variable will hold the whole given object,
+ *                                                        the second recursion will explore the property 'foo' and [obj] variable will hold the value 'bar'.
+ * @param   {<T>(r: ObjectIteration) => T}  callback   -  The function to call on each value of the given object. NOTE: is also called on the root object.
+ * @param   {ObjectIteration}               it         -  The current Object property data to be itreater recursivly.
+ * @param   {T|null}                        lastResult -  Hold the result of the last execution of the given callback and provides it for each call on the graph traversal.
+ * @returns {void}                                     -  The correspondent XML string of the given object.
  */
-export function WalkObject<ReturnType>(
-    obj: any,
-    callback: (i: ObjectIteration) => ReturnType,
-    key: string|null = null,
-    path: string|null = null,
-    parent: any = null,
-    lastResult: ReturnType|null = null
-): void {
+export function WalkObject<T>(object_: any, callback: (i: ObjectIteration, lastResult: T|null) => T|null, it: ObjectIteration = { value: null, key: null, path: null, parent: null }, lastResult: T|null = null): void {
     // value variable will hold the value of the current property being explored.
     // So if this is the first run it will hold the root object
     // but for the next recurtions it will hold the value of the parent in the current key being explored: parent[key].
-    const value = (key === null) ? obj : (parent[key] || obj);
+    it.value = (it.key === null) ? object_ : (it.parent[it.key] || object_);
     // lastResult will hold the return value of the callback in each recursion. NOTE: on the first recurtion lastResult is null;
-    lastResult = callback({ value, path, key, parent, lastResult });
+    lastResult = callback(it, lastResult);
     // If current value is Walkable (if it is an array or an object): we walk the object recursivly. In js typeof([]) === typeof({}) === typeof(null) so we typecheck;
-    if (typeof(value) !== 'object' && value !== null) return;
+    if (typeof(it.value) !== 'object' && it.value !== null) return;
     // Array and Objects can be iterable through Object.keys(value) so: for each key of the value we walk recursivly.
     // NOTE: Object.keys(['a', 'b', 'c']) === [0, 1, 2], and for common objects: Object.keys({a: 0, b: 1, c: 2}) is ['a', 'b': 'c'].
-    Object.keys(obj).forEach(k => WalkObject(obj[k], callback, k, IteratorPath(path, k), obj, lastResult));
+    Object.keys(object_).forEach(key => WalkObject(object_[key], callback, NextIteration(it, key, object_), lastResult));
 }
