@@ -67,13 +67,21 @@ export function ObjectIterationToXmlElement(i: any, rootXml: XMLDocument): any {
 export function IteratorPath(path: string, key: string): string {
     return !path ? key : `${path}.${key}`;
 }
-/** Summary.
+/** 
+ * Recursive walk of the properties of the given object and exec the given callback.
  *
- * Description.
+ * Graph traversal for js arrays and objects.
  *
- * @throws {Exception}
- * @param {object} o - Param description (e.g. "add", "edit").
- * @returns {string} The correspondent XML string of the given object.
+ * @param {object}              obj       - The object to traverse recursively.
+ *                                          NOTE: this changes on every recursion level,
+ *                                          so for an object { foo: 'bar' } -> the first recursion
+ *                                          [obj] variable will hold the whole given object,
+ *                                          the second recursion will explore the property 'foo' and [obj] variable will hold the value 'bar'.
+ * @param   {(r: any) => void}  calllback - The function to call on each value of the given object. NOTE: is also called on the root object.
+ * @param   {string}            key       - Hold the key of the current property being explored on the graph traversal operation. NOTE: is null on the first recursion.
+ * @param   {object}            parent    - Hold the current parent node of the current property being explored on the graph traversal operation.
+ * @param   {any}               result    - Hold the result of the last execution of the given callback and provides it for each call on the graph traversal.
+ * @returns {void}                      - The correspondent XML string of the given object.
  */
 export function WalkObject(obj: any, callback: (r: any) => void, key: string|null = null, path: string = '', parent: any = null, result: any = null): void {
     const value = (key === null) ? obj : (parent[key] || obj);
