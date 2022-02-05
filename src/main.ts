@@ -1,3 +1,17 @@
+
+/**
+ * Parse the given Json string.
+ *
+ * Description.
+ *
+ * @throws {InvalidArgumentException}
+ * @param {string} jsonString - The mode being performed (e.g. "add", "edit").
+ * @returns {Object} The Object correspondent to the given JsonString.
+ */
+export function JsonToXml(json: string, root: string = 'root'): string {
+    var jsonObject = JSON.parse(json);
+    return ObjectToXml(jsonObject, root);
+}
 /**
  * Parse the given Json string.
  *
@@ -12,19 +26,6 @@ export function ObjectToXml(obj: {}, root: string = 'root'): string {
     var xml = ObjectToXmlDocument(obj, root);
     var xmlString = serializer.serializeToString(xml);
     return xmlString;
-}
-/**
- * Parse the given Json string.
- *
- * Description.
- *
- * @throws {InvalidArgumentException}
- * @param {string} jsonString - The mode being performed (e.g. "add", "edit").
- * @returns {Object} The Object correspondent to the given JsonString.
- */
-export function JsonToXml(json: string, root: string = 'root'): string {
-    var jsonObject = JSON.parse(json);
-    return ObjectToXml(jsonObject, root);
 }
 /** Summary.
  *
