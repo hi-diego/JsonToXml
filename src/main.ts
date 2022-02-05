@@ -84,6 +84,9 @@ export function IteratorPath(path: string, key: string): string {
  * @returns {void}                      - The correspondent XML string of the given object.
  */
 export function WalkObject(obj: any, callback: (r: any) => void, key: string|null = null, path: string = '', parent: any = null, result: any = null): void {
+    // value variable will hold the value of the current property being explored.
+    // So if this is the first run it will be the given object
+    // but for the next recurtions it will be the the value that holds the parent in the current key baing explored: parent[key].
     const value = (key === null) ? obj : (parent[key] || obj);
     result = callback({ value, path, key, parent, result, obj });
     if (typeof(value) !== 'object') return;
