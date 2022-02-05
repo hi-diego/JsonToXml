@@ -27,12 +27,12 @@ console.log(xmlString);
 //     <facts.1>it some other thing</facts.1>
 //   </facts>
 //   <details>
-//     <details.preformance>true</details.preformance>
-//     <details.benchmark>
-//       <details.benchmark.0>1</details.benchmark.0>
-//       <details.benchmark.1>2</details.benchmark.1>
-//       <details.benchmark.2>3</details.benchmark.2>
-//     </details.benchmark>
+//     <preformance>true</preformance>
+//     <benchmark>
+//       <benchmark.0>1</benchmark.0>
+//       <benchmark.1>2</benchmark.1>
+//       <benchmark.2>3</benchmark.2>
+//     </benchmark>
 //   </details>
 // </test>
 ```

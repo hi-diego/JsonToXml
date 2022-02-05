@@ -50,10 +50,21 @@ export function ObjectToXmlDocument(obj: {}, root: string = 'root'): XMLDocument
  */
 export function ObjectIterationToXmlElement(i: any, rootXml: XMLDocument): any {
     if (!i.result) return rootXml.documentElement;
-    var child: Element = rootXml.createElement(i.path);
+    var child: Element = rootXml.createElement(Array.isArray(i.parent) ? i.path.split('.').slice(-2).join('.') : i.key);
     if (typeof(i.value) !== 'object') child.innerHTML = i.value;
     i.result.appendChild(child);
     return child;
+}
+/** Summary.
+ *
+ * Description.
+ *
+ * @throws {Exception}
+ * @param {object} o - Param description (e.g. "add", "edit").
+ * @returns {string} The correspondent XML string of the given object.
+ */
+export function IteratorPath(path: string, key: string): string {
+    return !path ? key : `${path}.${key}`;
 }
 /** Summary.
  *
@@ -67,5 +78,5 @@ export function WalkObject(obj: any, callback: (r: any) => void, key: string|nul
     const value = (key === null) ? obj : (parent[key] || obj);
     result = callback({ value, path, key, parent, result, obj });
     if (typeof(value) !== 'object') return;
-    Object.keys(obj).forEach(k => WalkObject(obj[k], callback, k, `${path}${ path ? '.' : '' }${k}`, obj, result));
+    Object.keys(obj).forEach(k => WalkObject(obj[k], callback, k, IteratorPath(path, k), obj, result));
 }
